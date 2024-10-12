@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=MuseoModerno:wght@200;500;700&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=MuseoModerno:wght@200;500;700&display=swap');
+.home2-container {
+  position: relative;
+  z-index: 5; /* Asegura que el Home2 esté debajo de las partículas */
+}
+
+
+
+body {
+  margin: 0;
+  font-family: Poppins;
+  background-image: url('/NieveFondo.jpg');
+  background-size: cover; /* Asegura que la imagen cubra todo el fondo */
+  background-repeat: no-repeat;
+  background-position: center; /* Centra la imagen en la pantalla */
+  background-attachment: fixed; /* La imagen permanece fija al hacer scroll */
+  color: #eee;
+  font-size: 15px;
+}
+
+body::before {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  content: '';
+  background-image: linear-gradient(to right, #a8aca0, #e8ebe5fa);
+  z-index: -1;
+  top: -200px;
+  left: calc(50% - 200px);
+  border-radius: 50% 50% 0% 0%;
+  pointer-events: none;
+  filter: blur(250px);
+}
+  
+.bg-gray-800-transparent {
+  background-color: rgba(31, 41, 55, 0.8); /* bg-gray-800 con 80% opacidad */
+}
+.bg-gray-B{
+  background-color:#babcc3; 
+
+}
+footer {
+  position: relative; /* Asegura que no interfiera con el fondo */
+  margin: 0;
+  padding: 0;
+}
+
+.animation_layer {
+	background-position: bottom center;
+	background-size: auto 1038px;
+	background-repeat: repeat-x;
+	width: 100%;
+	position: absolute;
+}
+
+.animation, .animation_layer {
+	height: 1000px;
+}
+
+.animation {
+  display: block;
+	position: relative;
+	z-index: 10;
+}
+
+.animation_layer.parallax {
+	position: fixed;
+}
+
+/* .image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.image-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+
+
+.image1 {
+  animation: fadeInOut 12s infinite;
+}
+
+.image2 {
+  animation: fadeInOut 12s infinite;
+  animation-delay: 6s;
+}
+
+
+.image-container:hover .image-slide {
+  animation: none; 
+}
+
+.image-container:hover .image1 {
+  opacity: 0;
+}
+
+.image-container:hover .image2 {
+  opacity: 1;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+  }
+  8.33%, 50% {
+    opacity: 1;
+  }
+  58.33% {
+    opacity: 0;
+  }
+} 
+
+*/ 
+
+/* App.css */
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* Opcional: Agregar un borde o sombra si lo deseas */
+}
+
+.image-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+/* Mostrar la imagen 1 por defecto */
+.image1 {
+  opacity: 1; /* Imagen 1 es visible por defecto */
+}
+
+/* Mostrar la imagen 2 cuando se hace hover */
+.image-container:hover .image1 {
+  opacity: 0; /* Oculta la imagen 1 */
+}
+
+.image-container:hover .image2 {
+  opacity: 1; /* Muestra la imagen 2 */
+}
+
+/* Opcional: Agregar una transición en el hover para que el cambio sea suave */
+.image-container {
+  transition: opacity 0.5s ease-in-out;
+}
+
+
+/* navbar */
+header{
+    position: fixed;
+    width: 1300px;
+    max-width: 100%;
+    height: 60px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    & img{
+        width: 50px;
+    }
+    & .logo, nav{
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        & span{
+            cursor: pointer;
+        }
+        & .active{
+            color: #e945e3;
+            text-shadow: 0 0 5px #7A43B6;
+        }
+    }
+    & .icon-bar{
+        width: 30px;
+        display: none;
+    }
+}
+/* home */
+
+/* .delay-02{
+    animation-delay: 0.2s!important;
+}
+.delay-04{
+    animation-delay: 0.4s!important;
+}
+.delay-06{
+    animation-delay: 0.6s!important;
+} */
+
+
+
+/* animation */
+.animation{
+    transform: translateY(50px);
+    filter: blur(20px);
+    opacity: 0;
+    transition: 0.5s;
+}
+.animation.active{
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+
+@keyframes shine {
+    to {
+        background-position: 200% center;
+    }
+}
+
+@media screen and (max-width: 1023px) {
+    section.home{
+        & .content{
+            & .name{
+                font-size: 4em;
+            }
+        }
+        & .avatar{
+            & img{
+                max-height: 500px;
+            }
+        }
+    }
+}
+@media screen and (max-width: 767px) {
+    header{
+        & nav{
+            width: 80%;
+            height: 100vh;
+            position: fixed;
+            flex-direction: column;
+            justify-content: start;
+            align-items: start;
+            inset: 0 auto 0 0;
+            background-color: #eee;
+            color: #0F1225;
+            padding: 50px;
+            box-sizing: border-box;
+            font-weight: bold;
+            left: -100%;
+            transition: .5s;
+        }
+        & .icon-bar{
+            display: block;
+        }
+        & nav.active{
+            left: 0;
+        } 
+    }
+   
+}
+
