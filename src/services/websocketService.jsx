@@ -130,6 +130,7 @@
 //     return socket;
 // };
 
+// Función para conectar el WebSocket
 export const connectWebSocket = (setProcessedImage, setActScore, token) => {
     const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
     
@@ -162,10 +163,6 @@ export const connectWebSocket = (setProcessedImage, setActScore, token) => {
             if (actScore === 1) {
                 console.log('Score actualizado:', actScore);
             }
-
-            // Opcional: manejar la imagen en una etiqueta <img> o en un canvas
-            // const imageUrl = `data:image/jpeg;base64,${processedImage}`;
-            // document.getElementById('yourImageId').src = imageUrl;
 
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);
