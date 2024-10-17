@@ -90,7 +90,6 @@ const VideoCaptureComponent = () => {
     const [imageSrc, setImageSrc] = useState(null);
     const { setActScore } = useStore();
     const socketRef = useRef(null);
-    const videoRef = useRef(null);
 
     let user = JSON.parse(localStorage.getItem('user'));
     const token = user['access'];
@@ -98,12 +97,21 @@ const VideoCaptureComponent = () => {
     useEffect(() => {
         const handleMessage = (data) => {
             console.log('Mensaje recibido desde WebSocket:', data);
-            if (data.image) {
-                const imageUrl = `data:image/jpeg;base64,${data.image}`;
-                setImageSrc(imageUrl);
-            }
-            if (data.actS) {
-                setActScore(data.actS);
+            
+            // Verifica si data es un objeto y tiene la propiedad 'image'
+            if (data && typeof data === 'object') {
+                if (data.image) {
+                    const imageUrl = `data:image/jpeg;base64,${data.image}`;
+                    setImageSrc(imageUrl);
+                } else {
+                    console.warn('No se encontró la propiedad "image" en el mensaje:', data);
+                }
+
+                if (data.actS !== undefined) {
+                    setActScore(data.actS);
+                }
+            } else {
+                console.error('El mensaje recibido no es un objeto válido:', data);
             }
         };
 
@@ -119,31 +127,8 @@ const VideoCaptureComponent = () => {
         };
     }, [token, setActScore]);
 
-    // Función para capturar frames y enviarlos al servidor
-    const captureFrame = () => {
-        if (videoRef.current && socketRef.current) {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = videoRef.current.videoWidth;
-            canvas.height = videoRef.current.videoHeight;
-            context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/jpeg').split(',')[1]; // Obtener solo la parte base64
-
-            // Enviar imagen al WebSocket
-            socketRef.current.send(JSON.stringify({ image: imageData, token }));
-        }
-    };
-
-    // Iniciar la captura de frames cada 500 ms
-    useEffect(() => {
-        const intervalId = setInterval(captureFrame, 500); // Ajusta el intervalo según sea necesario
-
-        return () => clearInterval(intervalId);
-    }, []);
-
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center">
-            <video ref={videoRef} id="video" className="hidden"></video>
+        <div className="w-full h-full flex items-center justify-center">
             {imageSrc ? (
                 <img src={imageSrc} alt="Processed" className="w-full h-full object-contain" />
             ) : (
@@ -154,4 +139,3 @@ const VideoCaptureComponent = () => {
 };
 
 export default VideoCaptureComponent;
-

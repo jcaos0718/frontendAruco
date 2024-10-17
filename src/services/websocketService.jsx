@@ -152,18 +152,27 @@ export const connectWebSocket = (setProcessedImage, setActScore, token) => {
             // Parse the incoming JSON data
             const data = JSON.parse(event.data);
 
-            // Extract image and score
-            const processedImage = data.image;
-            const actScore = data.actS;
+            // Verifica si data es un objeto y tiene la propiedad 'image'
+            if (data && typeof data === 'object') {
+                const processedImage = data.image;
+                const actScore = data.actS;
 
-            // Set the state with the received data
-            setProcessedImage(processedImage);
-            setActScore(actScore);
+                // Set the state with the received data
+                if (processedImage) {
+                    setProcessedImage(processedImage);
+                } else {
+                    console.warn('No se encontró la propiedad "image" en el mensaje:', data);
+                }
 
-            if (actScore === 1) {
-                console.log('Score actualizado:', actScore);
+                if (actScore !== undefined) {
+                    setActScore(actScore);
+                    if (actScore === 1) {
+                        console.log('Score actualizado:', actScore);
+                    }
+                }
+            } else {
+                console.error('El mensaje recibido no es un objeto válido:', data);
             }
-
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);
         }
