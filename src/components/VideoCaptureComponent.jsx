@@ -54,16 +54,18 @@ const VideoCaptureComponent = () => {
 
     useEffect(() => {
         const handleMessage = (data) => {
-            const imageUrl = `data:image/jpeg;base64,${data}`;
-            setImageSrc(imageUrl);
+            console.log('Mensaje recibido desde WebSocket:', data); // Para depurar
+            if (data.image) {
+                const imageUrl = `data:image/jpeg;base64,${data.image}`;
+                setImageSrc(imageUrl);
+            }
+            if (data.actS) {
+                setActScore(data.actS);
+            }
         };
 
-        // Conectar el WebSocket
         const socket = connectWebSocket(handleMessage, setActScore, token);
         socketRef.current = socket;
-
-        // Iniciar la cámara usando WebRTC
-        startCamera();
 
         return () => {
             if (socketRef.current) {
@@ -71,18 +73,6 @@ const VideoCaptureComponent = () => {
             }
         };
     }, [token, setActScore]);
-
-    // Función para iniciar la cámara utilizando WebRTC
-    const startCamera = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const videoElement = document.getElementById('video'); // Referencia al elemento <video>
-            videoElement.srcObject = stream;
-            videoElement.play();
-        } catch (error) {
-            console.error('Error accediendo a la cámara:', error);
-        }
-    };
 
     return (
         <div className="w-full h-full flex items-center justify-center">
