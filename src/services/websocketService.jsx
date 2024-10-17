@@ -131,9 +131,9 @@
 // };
 
 // Función para conectar el WebSocket
-export const connectWebSocket = (setProcessedImage, setActScore, token) => {
+export const connectWebSocket = (handleMessage, setActScore, token) => {
     const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
-    
+
     socket.onopen = () => {
         console.log('WebSocket connection established');
         // Enviar el token inmediatamente después de conectar
@@ -149,30 +149,9 @@ export const connectWebSocket = (setProcessedImage, setActScore, token) => {
 
     socket.onmessage = (event) => {
         try {
-            // Parse the incoming JSON data
+            // Parsear el JSON recibido
             const data = JSON.parse(event.data);
-
-            // Verifica si data es un objeto y tiene la propiedad 'image'
-            if (data && typeof data === 'object') {
-                const processedImage = data.image;
-                const actScore = data.actS;
-
-                // Set the state with the received data
-                if (processedImage) {
-                    setProcessedImage(processedImage);
-                } else {
-                    console.warn('No se encontró la propiedad "image" en el mensaje:', data);
-                }
-
-                if (actScore !== undefined) {
-                    setActScore(actScore);
-                    if (actScore === 1) {
-                        console.log('Score actualizado:', actScore);
-                    }
-                }
-            } else {
-                console.error('El mensaje recibido no es un objeto válido:', data);
-            }
+            handleMessage(data);  // Llamar a la función manejadora de mensajes
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);
         }
