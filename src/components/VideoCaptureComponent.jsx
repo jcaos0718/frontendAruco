@@ -127,13 +127,8 @@ const VideoCaptureComponent = () => {
     }, [token, setActScore]);
 
     return (
-        <div className="w-full h-full flex items-center justify-center">
-            <video id="video" className="hidden"></video> {/* Elemento <video> oculto */}
-            {imageSrc ? (
-                <img src={imageSrc} alt="Processed" className="w-full h-full object-contain" />
-            ) : (
-                <p>Cargando imagen...</p>
-            )}
+        <div>
+            {imageSrc && <img src={imageSrc} alt="Imagen del WebSocket" />}
         </div>
     );
 };
