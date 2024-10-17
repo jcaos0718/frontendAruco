@@ -97,8 +97,6 @@ const VideoCaptureComponent = () => {
     useEffect(() => {
         const handleMessage = (data) => {
             console.log('Mensaje recibido desde WebSocket:', data);
-            
-            // Verifica si data es un objeto y tiene la propiedad 'image'
             if (data && typeof data === 'object') {
                 if (data.image) {
                     const imageUrl = `data:image/jpeg;base64,${data.image}`;
@@ -129,6 +127,7 @@ const VideoCaptureComponent = () => {
 
     return (
         <div className="w-full h-full flex items-center justify-center">
+            <video id="video" className="hidden"></video> {/* Elemento <video> oculto */}
             {imageSrc ? (
                 <img src={imageSrc} alt="Processed" className="w-full h-full object-contain" />
             ) : (
