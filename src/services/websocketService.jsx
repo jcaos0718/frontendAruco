@@ -151,7 +151,10 @@ export const connectWebSocket = (handleMessage, setActScore, token) => {
         try {
             // Parsear el JSON recibido
             const data = JSON.parse(event.data);
+            console.log(data)
             handleMessage(data);  // Llamar a la función manejadora de mensajes
+            const imageUrl = `data:image/jpeg;base64,${data.image}`;
+            setImageSrc(imageUrl);
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);
         }
