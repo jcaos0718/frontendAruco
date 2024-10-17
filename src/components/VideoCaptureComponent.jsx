@@ -165,7 +165,7 @@ const VideoCaptureComponent = () => {
 
     return (
         <div>
-            <video ref={videoRef} id="video" autoPlay style={{ display: 'none' }} />
+            <video ref={videoRef} id="video" autoPlay  />
             {imageSrc && <img src={imageSrc} alt="Imagen del WebSocket" />}
         </div>
     );

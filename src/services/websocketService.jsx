@@ -193,7 +193,9 @@ export const startCamera = () => {
             setInterval(() => {
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-                // Enviar el frame a través del WebSocket
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(frameData);
+                }
             }, 100);
         })
         .catch((error) => {
