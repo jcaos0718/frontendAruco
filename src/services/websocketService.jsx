@@ -131,30 +131,26 @@
 // };
 
 // Función para conectar el WebSocket
+
+
 export const connectWebSocket = (handleMessage, setActScore, token) => {
     const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
 
     socket.onopen = () => {
         console.log('WebSocket connection established');
-        // Enviar el token inmediatamente después de conectar
         if (token) {
-            socket.send(JSON.stringify({ token: token }));
+            socket.send(JSON.stringify({ token }));
         } else {
             console.error('Token no definido, no se puede enviar');
         }
-
-        // Intentar acceder a la cámara usando WebRTC
         startCamera();
     };
 
     socket.onmessage = (event) => {
         try {
-            // Parsear el JSON recibido
             const data = JSON.parse(event.data);
-            console.log(data)
-            handleMessage(data);  // Llamar a la función manejadora de mensajes
-            const imageUrl = `data:image/jpeg;base64,${data.image}`;
-            setImageSrc(imageUrl);
+            console.log(data);
+            handleMessage(data);
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);
         }
@@ -162,9 +158,9 @@ export const connectWebSocket = (handleMessage, setActScore, token) => {
 
     socket.onclose = (event) => {
         if (event.wasClean) {
-            console.log('WebSocket connection closed cleanly');
+            console.log('Connection closed cleanly');
         } else {
-            console.error('WebSocket connection died');
+            console.error('Connection error');
         }
     };
 
@@ -175,14 +171,32 @@ export const connectWebSocket = (handleMessage, setActScore, token) => {
     return socket;
 };
 
-// Función para iniciar la cámara utilizando la API de WebRTC
-async function startCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const videoElement = document.getElementById('video');
-        videoElement.srcObject = stream;
-        videoElement.play();
-    } catch (error) {
-        console.error('Error accediendo a la cámara:', error);
+export const handleMessage = (data) => {
+    if (data.image) {
+        // Lógica para manejar la imagen recibida
     }
-}
+
+    if (data.actS) {
+        setActScore(data.actS);
+    }
+};
+
+export const startCamera = () => {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+            setInterval(() => {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+                // Enviar el frame a través del WebSocket
+            }, 100);
+        })
+        .catch((error) => {
+            console.error('Error accessing the camera:', error);
+        });
+};
