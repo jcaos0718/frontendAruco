@@ -91,6 +91,7 @@ const VideoCaptureComponent = () => {
     const { setActScore } = useStore();
     const socketRef = useRef(null);
     const videoRef = useRef(null); // Para referencia del video
+    const [isSocketOpen, setIsSocketOpen] = useState(false); // Estado para controlar si el WebSocket está abierto
 
     let user = JSON.parse(localStorage.getItem('user'));
     const token = user ? user['access'] : null;
@@ -118,9 +119,24 @@ const VideoCaptureComponent = () => {
         const socket = connectWebSocket(handleMessage, setActScore, token);
         socketRef.current = socket;
 
+        // Manejar el evento onopen para saber cuándo el WebSocket está listo
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+            setIsSocketOpen(true); // Actualizar el estado del socket a abierto
+            if (token) {
+                socket.send(JSON.stringify({ token: token })); // Enviar el token al establecer la conexión
+            }
+        };
+
+        // Manejar el evento onclose
+        socket.onclose = (event) => {
+            console.log('WebSocket connection closed:', event);
+            setIsSocketOpen(false); // Actualizar el estado del socket a cerrado
+        };
+
         // Iniciar la cámara y enviar imágenes
         const intervalId = setInterval(() => {
-            if (videoRef.current && socketRef.current) {
+            if (videoRef.current && socketRef.current && isSocketOpen) { // Verifica que el socket esté abierto
                 const canvas = document.createElement('canvas');
                 canvas.width = videoRef.current.videoWidth;
                 canvas.height = videoRef.current.videoHeight;
@@ -128,6 +144,8 @@ const VideoCaptureComponent = () => {
                 context.drawImage(videoRef.current, 0, 0);
                 const imageData = canvas.toDataURL('image/jpeg');
                 const base64Data = imageData.split(',')[1]; // Extraer la parte base64
+                
+                // Enviar la imagen solo si el socket está abierto
                 socket.send(JSON.stringify({ image: base64Data }));
             }
         }, 1000); // Enviar cada segundo
