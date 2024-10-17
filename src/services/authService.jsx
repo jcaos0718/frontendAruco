@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 //const API_URL = 'http://localhost:8000/api/auth/';
-const API_URL = 'https://backendaruco.onrender.com/';
+const API_URL = 'https://backendaruco.onrender.com/api/auth/';
 
 export const login = async (email, password) => {
     const response = await axios.post(`${API_URL}login/`, { email, password });
