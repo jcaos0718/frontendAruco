@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     if (user && user.username && user.token) {
       try {
         //const response = await fetch(`http://localhost:8000/api/auth/user/${user.username}/score`, {
-        const response = await fetch(`https://backendaruco.onrender.com/api/auth/user/${user.username}/score`, {
+        const response = await fetch(`https://backendaruco-bakn.onrender.com/api/auth/user/${user.username}/score`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

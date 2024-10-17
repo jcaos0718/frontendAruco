@@ -25,7 +25,7 @@
 // };
 export const connectWebSocket = (setProcessedImage, setActScore, token) => {
     //const socket = new WebSocket('ws://localhost:8000/ws/camera/');
-    const socket = new WebSocket('ws://https://backendaruco.onrender.com/ws/camera/');
+    const socket = new WebSocket('ws://https://backendaruco-bakn.onrender.com/ws/camera/');
     socket.onopen = () => {
         console.log('WebSocket connection established');
         // Enviar el token inmediatamente después de conectar

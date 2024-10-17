@@ -114,7 +114,7 @@ const Game = () => {
         const fetchUserScore = async () => {
             try {
                 //const response = await fetch(`http://localhost:8000/api/auth/user/${user.username}/score`, {
-                const response = await fetch(`https://backendaruco.onrender.com/api/auth/user/${user.username}/score`, {
+                const response = await fetch(`https://backendaruco-bakn.onrender.com/api/auth/user/${user.username}/score`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
