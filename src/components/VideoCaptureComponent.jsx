@@ -90,6 +90,7 @@ const VideoCaptureComponent = () => {
     const [imageSrc, setImageSrc] = useState(null);
     const { setActScore } = useStore();
     const socketRef = useRef(null);
+    const videoRef = useRef(null); // Para referencia del video
 
     let user = JSON.parse(localStorage.getItem('user'));
     const token = user ? user['access'] : null;
@@ -99,7 +100,6 @@ const VideoCaptureComponent = () => {
             console.log('Mensaje recibido desde WebSocket:', data);
             if (data && typeof data === 'object') {
                 if (data.image) {
-                    // Asegurarse de que la imagen es una cadena base64 válida
                     const imageUrl = `data:image/jpeg;base64,${data.image}`;
                     setImageSrc(imageUrl);
                 } else {
@@ -118,8 +118,23 @@ const VideoCaptureComponent = () => {
         const socket = connectWebSocket(handleMessage, setActScore, token);
         socketRef.current = socket;
 
+        // Iniciar la cámara y enviar imágenes
+        const intervalId = setInterval(() => {
+            if (videoRef.current && socketRef.current) {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(videoRef.current, 0, 0);
+                const imageData = canvas.toDataURL('image/jpeg');
+                const base64Data = imageData.split(',')[1]; // Extraer la parte base64
+                socket.send(JSON.stringify({ image: base64Data }));
+            }
+        }, 1000); // Enviar cada segundo
+
         // Limpia la conexión al desmontar el componente
         return () => {
+            clearInterval(intervalId);
             if (socketRef.current) {
                 socketRef.current.close();
             }
@@ -128,6 +143,7 @@ const VideoCaptureComponent = () => {
 
     return (
         <div>
+            <video ref={videoRef} id="video" autoPlay style={{ display: 'none' }} />
             {imageSrc && <img src={imageSrc} alt="Imagen del WebSocket" />}
         </div>
     );
