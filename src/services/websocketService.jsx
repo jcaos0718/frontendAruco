@@ -176,7 +176,7 @@ export const connectWebSocket = (handleMessage, setActScore, token) => {
 async function startCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const videoElement = document.getElementById('video'); // Asegúrate de tener un <video> en tu HTML
+        const videoElement = document.getElementById('video');
         videoElement.srcObject = stream;
         videoElement.play();
     } catch (error) {
