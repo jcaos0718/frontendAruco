@@ -173,7 +173,7 @@ export const connectWebSocket = (handleMessage, setActScore, token) => {
 
 export const handleMessage = (data) => {
     if (data.image) {
-        // Lógica para manejar la imagen recibida
+        setImageSrc(`data:image/jpeg;base64,${data.image}`);
     }
 
     if (data.actS) {
