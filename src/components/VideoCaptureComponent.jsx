@@ -98,20 +98,24 @@ const VideoCaptureComponent = () => {
 
     useEffect(() => {
         const handleMessage = (data) => {
-            console.log('Mensaje recibido desde WebSocket:', data);
-            if (data && typeof data === 'object') {
-                if (data.image) {
-                    const imageUrl = `data:image/jpeg;base64,${data.image}`;
-                    setImageSrc(imageUrl);
+            try {
+                console.log('Mensaje recibido desde WebSocket:', data);
+                if (data && typeof data === 'object') {
+                    if (data.image) {
+                        const imageUrl = `data:image/jpeg;base64,${data.image}`;
+                        setImageSrc(imageUrl);
+                    } else {
+                        console.warn('No se encontró la propiedad "image" en el mensaje:', data);
+                    }
+        
+                    if (data.actS !== undefined) {
+                        setActScore(data.actS);
+                    }
                 } else {
-                    console.warn('No se encontró la propiedad "image" en el mensaje:', data);
+                    console.error('El mensaje recibido no es un objeto válido:', data);
                 }
-
-                if (data.actS !== undefined) {
-                    setActScore(data.actS);
-                }
-            } else {
-                console.error('El mensaje recibido no es un objeto válido:', data);
+            } catch (error) {
+                console.error('Error al manejar el mensaje:', error);
             }
         };
 
