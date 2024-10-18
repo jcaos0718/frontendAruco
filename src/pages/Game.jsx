@@ -103,8 +103,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import VideoCaptureComponent from '../components/VideoCaptureComponent';
 import useStore from '../components/Store';
-import CameraCapture from '../components/CameraCapture';
-import WebSocketComponent from '../components/WebSocketComponent';
+// import CameraCapture from '../components/CameraCapture';
+// import WebSocketComponent from '../components/WebSocketComponent';
 
 const Game = () => {
     const { user, logout, updateUserScore } = useAuth();
