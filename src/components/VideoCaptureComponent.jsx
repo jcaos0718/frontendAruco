@@ -39,6 +39,7 @@
 
 // export default VideoCaptureComponent;
 
+
 import React, { useEffect, useRef, useState } from 'react';
 import { connectWebSocket } from '../services/websocketService';
 import useStore from './Store';
@@ -149,4 +150,5 @@ const VideoCaptureComponent = () => {
 };
 
 export default VideoCaptureComponent;
+
 
