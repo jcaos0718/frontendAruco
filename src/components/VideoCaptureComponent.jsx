@@ -89,7 +89,6 @@ const VideoCaptureComponent = () => {
                 console.log('WebSocket connection closed cleanly');
             } else {
                 console.error('WebSocket connection closed unexpectedly');
-                // Intentar reconectar si se cierra inesperadamente
                 setTimeout(() => connectWebSocket(token), 5000); // Reintentar después de 5 segundos
             }
         };
@@ -99,17 +98,6 @@ const VideoCaptureComponent = () => {
         };
 
         return socket;
-    };
-
-    const handleMessage = (data) => {
-        if (data.image) {
-            // Actualiza el estado con la imagen recibida
-            setImageSrc(`data:image/jpeg;base64,${data.image}`);
-        }
-
-        if (data.actS) {
-            setActScore(data.actS);
-        }
     };
 
     const startCamera = () => {
@@ -133,7 +121,6 @@ const VideoCaptureComponent = () => {
     };
 
     const sendFrameToWebSocket = (frame) => {
-        // Verifica que el WebSocket esté en estado OPEN antes de enviar datos
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({ frame }));
         } else {
