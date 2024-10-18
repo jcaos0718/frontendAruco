@@ -45,79 +45,110 @@ import useStore from './Store';
 
 const VideoCaptureComponent = () => {
     const [imageSrc, setImageSrc] = useState(null);
-    const { setActScore } = useStore();
-    const socketRef = useRef(null);
-    const videoRef = useRef(null);
-    const canvasRef = useRef(null);
-
-    let user = JSON.parse(localStorage.getItem('user'));
-    const token = user['access'];
+    const [actScore, setActScore] = useState(0);
+    const [socket, setSocket] = useState(null); // Estado para almacenar la instancia del WebSocket
 
     useEffect(() => {
-        // Iniciar la cámara
-        const startCamera = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            } catch (error) {
-                console.error('Error accessing the camera:', error);
-            }
-        };
-        startCamera();
+        const token = "YOUR_TOKEN_HERE"; // Asegúrate de tener tu token
+        const newSocket = connectWebSocket(token);
+        setSocket(newSocket);
 
-        // Configurar WebSocket
-        const handleMessage = (data) => {
-            const imageUrl = `data:image/jpeg;base64,${data}`;
-            setImageSrc(imageUrl);
-        };
-
-        const socket = connectWebSocket(handleMessage, setActScore, token);
-        socketRef.current = socket;
-
+        // Limpiar cuando el componente se desmonte
         return () => {
-            if (socketRef.current) {
-                socketRef.current.close();
+            if (newSocket) {
+                newSocket.close();
             }
         };
-    }, [token, setActScore]);
+    }, []);
 
-    const captureImage = () => {
-        const canvas = canvasRef.current;
-        const video = videoRef.current;
+    const connectWebSocket = (token) => {
+        const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
 
-        if (canvas && video) {
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/jpeg');
-
-            // Enviar la imagen capturada al backend vía WebSocket
-            if (socketRef.current) {
-                socketRef.current.send(JSON.stringify({ image: imageData }));
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+            if (token) {
+                socket.send(JSON.stringify({ token }));
+                startCamera();
+            } else {
+                console.error('Token no definido, no se puede enviar');
             }
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
+
+        socket.onclose = (event) => {
+            if (event.wasClean) {
+                console.log('WebSocket connection closed cleanly');
+            } else {
+                console.error('WebSocket connection closed unexpectedly');
+                // Intentar reconectar si se cierra inesperadamente
+                setTimeout(() => connectWebSocket(token), 5000); // Reintentar después de 5 segundos
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        return socket;
+    };
+
+    const handleMessage = (data) => {
+        if (data.image) {
+            // Actualiza el estado con la imagen recibida
+            setImageSrc(`data:image/jpeg;base64,${data.image}`);
+        }
+
+        if (data.actS) {
+            setActScore(data.actS);
         }
     };
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            captureImage();
-        }, 1000); // Captura una imagen cada segundo
+    const startCamera = () => {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
 
-        return () => clearInterval(interval);
-    }, []);
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+                video.play();
+                setInterval(() => {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const frame = canvas.toDataURL('image/jpeg');
+                    sendFrameToWebSocket(frame);
+                }, 100);
+            })
+            .catch((error) => {
+                console.error('Error accessing the camera:', error);
+            });
+    };
+
+    const sendFrameToWebSocket = (frame) => {
+        // Verifica que el WebSocket esté en estado OPEN antes de enviar datos
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ frame }));
+        } else {
+            console.warn('WebSocket is not open. Cannot send frame.');
+        }
+    };
 
     return (
-        <div className="w-full h-full flex items-center justify-center">
-            <video ref={videoRef} autoPlay playsInline className="hidden" width="640" height="480" />
-            <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480" />
-            {imageSrc ? (
-                <img src={imageSrc} alt="Processed" className="w-full h-full object-contain" />
-            ) : (
-                <div className="text-white text-2xl">Waiting for video...</div>
-            )}
+        <div>
+            <video id="video" width="640" height="480" autoPlay></video>
+            <canvas id="canvas" width="640" height="480" style={{ display: 'none' }}></canvas>
+            {imageSrc && <img src={imageSrc} alt="Received from WebSocket" />}
+            <div>Score: {actScore}</div>
         </div>
     );
 };
+
 
 export default VideoCaptureComponent;
