@@ -41,13 +41,14 @@
 
 
 import React, { useEffect, useRef, useState } from 'react';
-import { connectWebSocket } from '../services/websocketService';
-import useStore from './Store';
 
 const VideoCaptureComponent = () => {
     const [imageSrc, setImageSrc] = useState(null);
     const [actScore, setActScore] = useState(0);
     const [socket, setSocket] = useState(null);
+    const [isWebSocketOpen, setIsWebSocketOpen] = useState(false); // Nuevo estado
+    const frameQueue = useRef([]); // Usar una referencia para almacenar los frames en cola
+
     let user = JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
@@ -55,7 +56,6 @@ const VideoCaptureComponent = () => {
         const newSocket = connectWebSocket(token, handleMessage);
         setSocket(newSocket);
 
-        // Limpiar cuando el componente se desmonte
         return () => {
             if (newSocket) {
                 newSocket.close();
@@ -68,6 +68,7 @@ const VideoCaptureComponent = () => {
 
         socket.onopen = () => {
             console.log('WebSocket connection established');
+            setIsWebSocketOpen(true);
             if (token) {
                 socket.send(JSON.stringify({ token }));
                 startCamera();
@@ -79,13 +80,14 @@ const VideoCaptureComponent = () => {
         socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                handleMessage(data); // Llama a handleMessage aquí
+                handleMessage(data);
             } catch (error) {
                 console.error('Error parsing WebSocket message:', error);
             }
         };
 
         socket.onclose = (event) => {
+            setIsWebSocketOpen(false);
             if (event.wasClean) {
                 console.log('WebSocket connection closed cleanly');
             } else {
@@ -132,12 +134,27 @@ const VideoCaptureComponent = () => {
     };
 
     const sendFrameToWebSocket = (frame) => {
-        if (socket && socket.readyState === WebSocket.OPEN) {
+        if (isWebSocketOpen) {
             socket.send(JSON.stringify({ frame }));
         } else {
-            console.warn('WebSocket is not open. Cannot send frame.');
+            console.warn('WebSocket is not open. Adding frame to queue.');
+            frameQueue.current.push(frame); // Agregar frame a la cola
         }
     };
+
+    // Manejar la cola de frames cuando el WebSocket se abre
+    useEffect(() => {
+        const sendQueuedFrames = () => {
+            while (frameQueue.current.length > 0) {
+                const frame = frameQueue.current.shift(); // Obtener el primer frame en la cola
+                socket.send(JSON.stringify({ frame })); // Enviar el frame
+            }
+        };
+
+        if (isWebSocketOpen) {
+            sendQueuedFrames(); // Enviar frames en cola si el WebSocket está abierto
+        }
+    }, [isWebSocketOpen]); // Ejecutar cada vez que cambia isWebSocketOpen
 
     return (
         <div>
@@ -150,5 +167,3 @@ const VideoCaptureComponent = () => {
 };
 
 export default VideoCaptureComponent;
-
-
