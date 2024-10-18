@@ -47,9 +47,10 @@ const VideoCaptureComponent = () => {
     const [imageSrc, setImageSrc] = useState(null);
     const [actScore, setActScore] = useState(0);
     const [socket, setSocket] = useState(null); // Estado para almacenar la instancia del WebSocket
+    let user = JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
-        const token = "YOUR_TOKEN_HERE"; // Asegúrate de tener tu token
+        const token = user['access']; // Asegúrate de tener tu token
         const newSocket = connectWebSocket(token);
         setSocket(newSocket);
 
