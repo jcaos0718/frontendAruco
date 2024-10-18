@@ -103,7 +103,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import VideoCaptureComponent from '../components/VideoCaptureComponent';
 import useStore from '../components/Store';
-
+import CameraCapture from '../components/CameraCapture';
+import WebSocketComponent from '../components/WebSocketComponent';
 
 const Game = () => {
     const { user, logout, updateUserScore } = useAuth();
@@ -157,7 +158,10 @@ const Game = () => {
                     <h2 className="text-4xl font-bold mb-4 text-blue-500">Start to play, {user.username}!</h2>
 
                     <div className="relative w-2.5/4 h-2.5/4 rounded-lg overflow-hidden mb-4">
-                        <VideoCaptureComponent />
+                        {/* <VideoCaptureComponent /> */}
+
+                        <CameraCapture onCapture={setImageData} />
+                        <WebSocketComponent imageData={imageData} />
                         
                       
                         {/* Reindeer image */}

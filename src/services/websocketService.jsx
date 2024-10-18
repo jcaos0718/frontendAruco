@@ -23,7 +23,6 @@
 
 //     return socket;
 // };
-
 // export const connectWebSocket = (setProcessedImage, setActScore, token) => {
 //     //const socket = new WebSocket('ws://localhost:8000/ws/camera/');
 //     const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
@@ -31,6 +30,7 @@
 //         console.log('WebSocket connection established');
 //         // Enviar el token inmediatamente después de conectar
 //         socket.send(JSON.stringify({ token: token }));
+        
 //     };
 
 //     socket.onmessage = (event) => {
@@ -75,130 +75,55 @@
 //     return socket;
 // };
 
-// export const connectWebSocket = (setProcessedImage, setActScore, token) => {
-//     const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
+export const connectWebSocket = (setProcessedImage, setActScore, token) => {
+    const socketUrl = 'wss://backendaruco-bakn.onrender.com/ws/camera/';
+    let socket = new WebSocket(socketUrl);
 
-//     socket.onopen = () => {
-//         console.log('WebSocket connection established');
+    const connect = () => {
+        socket = new WebSocket(socketUrl);
 
-//         // Asegúrate de que el token esté definido antes de enviarlo
-//         if (token) {
-//             socket.send(JSON.stringify({ token: token }));
-//         } else {
-//             console.error('Token no definido, no se puede enviar');
-//         }
-//     };
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+            // Enviar el token inmediatamente después de conectar
+            socket.send(JSON.stringify({ token: token }));
+        };
 
-//     socket.onmessage = (event) => {
-//         try {
-//             // Parse the incoming JSON data
-//             const data = JSON.parse(event.data);
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
 
-//             // Extract image and score
-//             const processedImage = data.image;
-//             const actScore = data.actS;
+                // Extraer imagen procesada y puntaje
+                const processedImage = data.image;
+                const actScore = data.actS;
 
-//             // Set the state with the received data
-//             setProcessedImage(processedImage);
-//             setActScore(actScore);
-            
-//             if (actScore === 1) {
-//                 console.log('Score actualizado:', actScore);
-//             }
+                // Actualizar el estado con los datos recibidos
+                setProcessedImage(processedImage);
+                setActScore(actScore);
 
-//             // Opcional: manejar la imagen en una etiqueta <img> o en un canvas
-//             // const imageUrl = `data:image/jpeg;base64,${processedImage}`;
-//             // document.getElementById('yourImageId').src = imageUrl;
+                if (actScore === 1) {
+                    console.log('Active Score:', actScore);
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
 
-//         } catch (error) {
-//             console.error('Error parsing WebSocket message:', error);
-//         }
-//     };
+        socket.onclose = (event) => {
+            if (event.wasClean) {
+                console.log('WebSocket connection closed cleanly');
+            } else {
+                console.error('WebSocket connection died, attempting to reconnect...');
+                setTimeout(connect, 3000); // Intentar reconectar después de 3 segundos
+            }
+        };
 
-//     socket.onerror = (event) => {
-//         console.error('WebSocket error observed:', event);
-//     };
-
-//     socket.onclose = (event) => {
-//         if (event.wasClean) {
-//             console.log('WebSocket connection closed cleanly');
-//         } else {
-//             console.error('WebSocket connection died');
-//         }
-//     };
-
-//     return socket;
-// };
-
-// Función para conectar el WebSocket
-
-
-export const connectWebSocket = (handleMessage, setActScore, token) => {
-    const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
-
-    socket.onopen = () => {
-        console.log('WebSocket connection established');
-        if (token) {
-            socket.send(JSON.stringify({ token }));
-        } else {
-            console.error('Token no definido, no se puede enviar');
-        }
-        startCamera();
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
     };
 
-    socket.onmessage = (event) => {
-        try {
-            const data = JSON.parse(event.data);
-            console.log(data);
-            handleMessage(data);
-        } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-        }
-    };
-
-    socket.onclose = (event) => {
-        if (event.wasClean) {
-            console.log('Connection closed cleanly');
-        } else {
-            console.error('Connection error');
-        }
-    };
-
-    socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
+    // Iniciar la conexión WebSocket
+    connect();
 
     return socket;
-};
-
-export const handleMessage = (data) => {
-    if (data.image) {
-        setImageSrc(`data:image/jpeg;base64,${data.image}`);
-    }
-
-    if (data.actS) {
-        setActScore(data.actS);
-    }
-};
-
-export const startCamera = () => {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-            video.srcObject = stream;
-            video.play();
-            setInterval(() => {
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-                if (socket.readyState === WebSocket.OPEN) {
-                    socket.send(frameData);
-                }
-            }, 100);
-        })
-        .catch((error) => {
-            console.error('Error accessing the camera:', error);
-        });
 };
