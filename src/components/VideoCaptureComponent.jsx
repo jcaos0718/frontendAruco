@@ -46,12 +46,12 @@ import useStore from './Store';
 const VideoCaptureComponent = () => {
     const [imageSrc, setImageSrc] = useState(null);
     const [actScore, setActScore] = useState(0);
-    const [socket, setSocket] = useState(null); // Estado para almacenar la instancia del WebSocket
+    const [socket, setSocket] = useState(null);
     let user = JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
-        const token = user['access']; // Asegúrate de tener tu token
-        const newSocket = connectWebSocket(token);
+        const token = user['access'];
+        const newSocket = connectWebSocket(token, handleMessage);
         setSocket(newSocket);
 
         // Limpiar cuando el componente se desmonte
@@ -62,7 +62,7 @@ const VideoCaptureComponent = () => {
         };
     }, []);
 
-    const connectWebSocket = (token) => {
+    const connectWebSocket = (token, handleMessage) => {
         const socket = new WebSocket('wss://backendaruco-bakn.onrender.com/ws/camera/');
 
         socket.onopen = () => {
@@ -78,7 +78,7 @@ const VideoCaptureComponent = () => {
         socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                handleMessage(data);
+                handleMessage(data); // Llama a handleMessage aquí
             } catch (error) {
                 console.error('Error parsing WebSocket message:', error);
             }
@@ -89,7 +89,7 @@ const VideoCaptureComponent = () => {
                 console.log('WebSocket connection closed cleanly');
             } else {
                 console.error('WebSocket connection closed unexpectedly');
-                setTimeout(() => connectWebSocket(token), 5000); // Reintentar después de 5 segundos
+                setTimeout(() => connectWebSocket(token, handleMessage), 5000);
             }
         };
 
@@ -98,6 +98,16 @@ const VideoCaptureComponent = () => {
         };
 
         return socket;
+    };
+
+    const handleMessage = (data) => {
+        if (data.image) {
+            setImageSrc(`data:image/jpeg;base64,${data.image}`);
+        }
+
+        if (data.actS) {
+            setActScore(data.actS);
+        }
     };
 
     const startCamera = () => {
@@ -138,5 +148,5 @@ const VideoCaptureComponent = () => {
     );
 };
 
-
 export default VideoCaptureComponent;
+
